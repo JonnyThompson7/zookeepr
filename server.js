@@ -1,21 +1,12 @@
 const express = require('express');
+const { animals } = require('./data/animals.json');
+
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-app.listen(PORT, () => {
-    console.log(`Api server now on port ${PORT}!`);
-});
-
-const { animals } = require('./data/animals.json');
-
-function findById(id, animalsArray) {
-    const result = animalsArray.filter(animal => animal.id === id)[0];
-    return result;
-}
-
 function filterByQuery(query, animalsArray) {
     let personalityTraitsArray = [];
-    // Save aniamlsArray as filteredResults
+    // Save animalsArray as filteredResults
     let filteredResults = animalsArray;
     if (query.personalityTraits) {
         if (typeof query.personalityTraits === 'string') {
@@ -50,6 +41,19 @@ function filterByQuery(query, animalsArray) {
     return filteredResults;
 }
 
+function findById(id, animalsArray) {
+    const result = animalsArray.filter(animal => animal.id === id)[0];
+    return result;
+}
+
+app.get('/api/animals', (req, res) => {
+    let result = animals
+    if (req.query) {
+        result = filterByQuery(req.query, result);
+    }
+    res.json(result);
+});
+
 app.get('/api/animals/:id', (req, res) => {
     const result = findById(req.params.id, animals);
     if (result) {
@@ -57,4 +61,14 @@ app.get('/api/animals/:id', (req, res) => {
     } else {
         res.send(404);
     }
+});
+
+app.post('/api/animals', (req, res) => {
+    // req.body is where incoming content will be
+    console.log(req.body);
+    res.json(req.body);
+});
+
+app.listen(PORT, () => {
+    console.log(`Api server now on port ${PORT}!`);
 });
